@@ -1,0 +1,743 @@
+#include<iostream>
+#include<algorithm>
+using namespace std;
+struct node
+{
+	int allocate;
+	string pro;
+	int arrive;
+	int cpu;
+	node *prev;
+	node *next;	
+};
+node *start=NULL;
+node *end=NULL;
+node *start_same=NULL;
+node *end_same=NULL;
+int id=0,all_zero=0,init=0;
+int* arrival;
+int* process;
+int* highpri;
+int* non_zero;
+int* burst;
+int* sortarr;
+int* priority;
+int** ctw;
+int** arr;
+//void same(int);
+//void idle();
+//void different();
+int high(int n,int prio)
+{
+	cout<<"inside high function-----------------------------"<<endl;
+	int gp=0,loc,no,index=0;
+	
+	gp=arr[index][3];
+	loc=index;
+	if(arr[index][2] == 0)
+	{
+		index++;
+		gp=arr[index][3];
+		loc=index;
+		if( (index >= n) && (arr[index][2] == 0) )
+		{
+			//goto comp;
+			exit(0);
+		}
+		else
+		{
+			return loc;
+		}
+		while(arr[index][2] == 0)
+		{
+			index++;
+			gp=arr[index][3];
+			loc=index;
+			if( (index >= n) && (arr[index][2] == 0) )
+			{
+				//goto comp;
+				exit(0);
+			}
+			else
+			{
+				return loc;
+			}
+		}
+	}
+	//no_process=1;
+	
+	//if(no_process == 1)
+	//{
+		for(int j=0;j<(prio-1);j++)
+		{
+			if( (gp < arr[j+1][3]) && (arr[j+1][2] > 0) )
+			{
+				gp=arr[j+1][3];
+				loc=j+1;
+			}
+			else
+			{
+				if( (gp == arr[j+1][3]) && (arr[j][2] > 0) )
+				{
+					
+					//continue;
+				}
+			}
+		}
+		
+	//return loc;
+	//}
+	return loc;
+}
+void add(int loc,int n)
+{
+	cout<<"inside add function-----------------------------"<<endl;
+	node *p=new node;
+	p->allocate=end->cpu;
+	p->pro="p";
+	p->arrive=arr[loc][0];
+	p->cpu=end->cpu+1;
+	p->next=NULL;
+	p->prev=NULL;
+	end->next=p;
+	p->prev=end;
+	end=p;
+	arr[loc][2]=arr[loc][2]-1;
+	if(arr[loc][2] == 0)
+	{
+		all_zero++;
+	}
+	arr[loc][3]=arr[loc][3]+1;
+	for(int k=0;k<n;k++)
+	{
+		if( (arr[k][1] <= end->cpu) && (k != loc) )
+		{
+			arr[k][3]=arr[k][3]+2;
+		}
+	}
+	cout<<"priority of each process is :"<<endl;
+	for(int i=0;i<n;i++)
+	{
+		cout<<arr[i][3]<<endl;
+	}
+		
+}
+void different(int n)
+{
+	cout<<"inside different function-------------------------"<<endl;
+	int s1,s2,s3,s4;
+	for(int i=0;i<n;i++)
+	{
+		for(int j=i+1;j<n;j++)
+		{
+			if(arr[i][1] > arr[j][1])
+			{
+				s1=arr[i][0];
+				arr[i][0]=arr[j][0];
+				arr[j][0]=s1;
+				
+				s2=arr[i][1];
+				arr[i][1]=arr[j][1];
+				arr[j][1]=s2;
+				
+				s3=arr[i][2];
+				arr[i][2]=arr[j][2];
+				arr[j][2]=s3;
+				
+				s4=arr[i][3];
+				arr[i][3]=arr[j][3];
+				arr[j][3]=s4;
+			}
+		}
+	}
+	cout<<"\n\n processes \t Arrival Time \t Burst Time \t Priority"<<endl;
+	for(int i=0;i<n;i++)
+	{
+		for(int j=0;j<4;j++)
+		{
+			cout<<"\t"<<arr[i][j]<<"\t";
+		}
+		cout<<"\n";
+	}
+	int loc=0,occur=0,con,nz=0,k=0;
+	
+	for(int i=0;all_zero!=n;i++)
+	{
+		cout<<"inside loop and i :"<<i<<endl;
+		if(i == n)
+		{
+			i=0;
+			//loc = i;
+		}
+		loc=i;
+		cout<<"location is :"<<loc<<endl;
+		
+	//	cout<<"end->cpu is :"<<end->cpu<<">"<<sortarr[n-1]<<endl;
+		if(start != NULL)
+		{
+			cout<<"end->cpu is :"<<end->cpu<<">"<<sortarr[n-1]<<endl;
+			if(end->cpu >= sortarr[n-1])
+			{
+				cout<<"goto comp"<<endl;
+				goto comp;
+				break;
+			}
+			//init++;
+		}
+		if(start == NULL)
+		{
+			cout<<"start == null"<<endl;
+			con=0;
+			cout<<"con is :"<<con<<endl;
+		}
+		else
+		{
+			cout<<"start != null"<<endl;
+			con=end->cpu;
+			cout<<"con is :"<<con<<endl;
+		}
+		
+		
+		if( (arr[loc][1] <= con) && (arr[loc][2] > 0) )
+		{
+			cout<<"arr["<<loc<<"][1]"<<arr[loc][1]<<"<="<<con<<endl;
+			if(start == NULL)
+			{
+				cout<<"start == null"<<endl;
+				node *p=new node;
+				if(start ==NULL)
+				{
+					p->allocate=0;
+				}
+				else
+				{
+					p->allocate=end->cpu;
+				}
+				p->pro="p";
+				p->arrive=arr[loc][0];
+				p->cpu=1;
+				p->next=NULL;
+				p->prev=NULL;
+				if(start==NULL)
+				{
+					end=p;
+					start=p;	
+				}
+				else
+				{
+					end->next=p;
+					p->prev=end;
+					end=p;
+				}
+				
+				arr[loc][2]=arr[loc][2]-1;
+				if(arr[loc][2] == 0)
+				{
+					all_zero++;
+				}
+				arr[loc][3]=arr[loc][3]+1;
+				for(int j=0;j<n;j++)
+				{
+					if( (arr[j][1] <= end->cpu) && (j!=loc) )
+					{
+						arr[j][3]=arr[j][3]+2;		
+					}
+				}
+				cout<<"priority of each process is :"<<endl;
+				for(int i=0;i<n;i++)
+				{
+					cout<<arr[i][3]<<endl;
+				}
+				
+			}
+			else
+			{
+				cout<<"start != null inside in else part"<<endl;
+				int prio=0;
+				for(int k=0;k<n;k++)
+				{
+					if( (arr[k][1] <= con) && (arr[k][2] > 0) ) 
+					{
+						prio++;	
+					}	
+				}
+				cout<<"prio is :"<<prio<<endl;
+				loc=high(n,prio);
+				cout<<"process in loc :"<<loc<<"is going to be add"<<endl;
+				add(loc,n);
+			}
+			
+			
+		}
+		else
+		{
+			int prio=0;
+			for(int k=0;k<n;k++)
+			{
+				if( (arr[k][1] <= con) && (arr[k][2] > 0) ) 
+				{
+					prio++;	
+				}	
+			}
+			cout<<"prio is :"<<prio<<endl;
+			if(prio == 0)
+			{
+				cout<<"prio == 0"<<endl;
+				node *p=new node;
+				if(start ==NULL)
+				{
+					p->allocate=0;
+				}
+				else
+				{
+					p->allocate=end->cpu;
+				}
+				
+				p->pro="idle";
+				p->arrive=1;
+				p->cpu=arr[loc][1];
+				p->next=NULL;
+				p->prev=NULL;
+				if(start==NULL)
+				{
+					end=p;
+					start=p;	
+				}
+				else
+				{
+					end->next=p;
+					p->prev=end;
+					end=p;
+				}
+				for(int k=0;k<n;k++)
+				{
+					if( (arr[k][1] <= end->cpu) && (arr[k][2] > 0) ) 
+					{
+						prio++;	
+					}	
+				}
+				if(prio != 0)
+				{
+					loc=high(n,prio);
+					add(loc,n);
+				}
+				
+			}
+			else
+			{
+				cout<<"else part and prio != 0"<<endl;
+				loc=high(n,prio);
+				cout<<"process at location "<<loc<<"is going to be add"<<endl;
+				add(loc,n);
+			}
+			
+			
+			
+			/*for(int k=0;k<pro;k++)
+			{
+				for(int x=0;x<n;x++)
+				{
+					if(sortarr[k] == arr[x][1])
+					{
+						loc1=x;
+					}
+				}
+				for(int y=0;y<n;y++)
+				{
+					if(sortarr[k+1] == arr[y][1])
+					{
+						loc2=y;
+					}
+				}
+				*/
+				/*
+				if(arr[loc1][3] > arr[loc2][3])
+				{
+					add(loc1);
+				}
+				*/
+			//}	
+		}
+	}
+	comp:
+		cout<<"----------------inside goto complete----------------------"<<endl;
+		for(int i=0;i<n;i++)
+		{
+			if(arr[i][2] > 0)
+			{
+				nz++;
+			}
+		}
+	
+		highpri=new int[nz];
+		for(int i=0;i<n;i++)
+		{
+			if(arr[i][2] > 0) 
+			{
+				highpri[k]=arr[i][3];
+				k++;
+			}
+		}
+		sort(highpri, highpri+nz, greater<int>());
+		
+		for(int i=0;i<nz;i++)
+		{
+			for(int j=0;j<n;j++)
+			{
+				if((highpri[i] == arr[j][3]) && (arr[j][2] > 0))
+				{
+					node *p=new node;
+					p->allocate=end->cpu;
+					p->pro="p";
+					p->arrive=arr[j][0];
+					p->cpu=arr[j][2]+end->cpu;
+					arr[j][2]=arr[j][2]-arr[j][2];
+					p->next=NULL;
+					p->prev=NULL;
+					end->next=p;
+					p->prev=end;
+					end=p;
+					break;
+				}		
+			}	
+		}
+}
+void same(int n)
+{
+	cout<<"inside same function"<<endl;
+	int nz=0,k=0;
+	for(int i=0;i<n-1;i++)
+	{
+		
+		if(id == 1)
+		{
+			//cout<<"inside id == 1"<<endl;
+			node *p=new node;
+			//cout<<"node is created"<<endl;
+			if(start_same == NULL)
+			{
+				//cout<<"start_same == NULL"<<endl;
+				p->allocate=0;	
+			}
+			else
+			{
+				//cout<<"allocating end->cpu"<<endl;
+				p->allocate=end_same->cpu;
+			}
+			p->pro="P";
+			//cout<<"process is added"<<endl;
+			p->arrive=arr[i][0];
+			//cout<<"arrive is added"<<endl;
+			p->cpu=end_same->cpu+1;
+			//cout<<"cpu time is added"<<endl;
+			p->prev=NULL;
+			//cout<<"prev set to null"<<endl;
+			p->next=NULL;
+			//cout<<"next set to null"<<endl;
+			arr[i][2]=arr[i][2]-1;
+			//cout<<"1 subtracted from arrive"<<endl;
+			arr[i][3]=arr[i][3]+1;
+			//cout<<"1 added to priority"<<endl;
+			for(int j=i+1;j<n;j++)
+			{
+				
+				arr[j][3]=arr[j][3]+2;
+				//cout<<"2 added to priority"<<endl;
+			}
+			if(start_same==NULL)
+			{
+				//cout<<"start_same==NULL"<<endl;
+				start_same=p;
+				end_same=p;
+			}
+			else
+			{
+				//cout<<"adding node "<<endl;
+				end_same->next=p;
+				p->prev=end_same;
+				end_same=p;
+			}
+			id=2;
+			//cout<<"id is :"<<id<<endl;
+		}
+
+		if(start_same == NULL)
+		{
+			//cout<<"inside start_same == null"<<endl;
+			node *p=new node;
+			if(start_same == NULL)
+			{
+				p->allocate=0;	
+			}
+			else
+			{
+				p->allocate=end_same->cpu;
+			}
+			p->pro="P";
+			p->arrive=arr[i][0];
+			p->cpu=1;
+			p->prev=NULL;
+			p->next=NULL;
+			arr[i][2]=arr[i][2]-1;
+			arr[i][3]=arr[i][3]+1;
+			for(int j=i+1;j<n;j++)
+			{
+				arr[j][3]=arr[j][3]+2;
+			}
+			if(start_same==NULL)
+			{
+				start_same=p;
+				end_same=p;
+			}
+			else
+			{
+				end_same->next=p;
+				p->prev=end_same;
+				end_same=p;
+			}
+			
+		}
+		
+		
+		if(i>=1)
+		{
+			
+			//cout<<"inside simple loop"<<endl;
+			node *p=new node;
+			p->allocate=end_same->cpu;
+			p->pro="P";
+			p->arrive=arr[i][0];
+			p->cpu=end_same->cpu+1;
+			p->prev=NULL;
+			p->next=NULL;
+			arr[i][2]=arr[i][2]-1;
+			for(int j=i+1;j<n;j++)
+			{
+				arr[j][3]=arr[j][3]+2;
+			}
+			if(start_same==NULL)
+			{
+				start_same=p;
+				end_same=p;
+			}
+			else
+			{
+				end_same->next=p;
+				p->prev=end_same;
+				end_same=p;
+			}
+		}
+		
+	}
+	
+	node *p=new node;
+	p->allocate=end_same->cpu;
+	p->pro="p";
+	p->arrive=arr[n-1][0];
+	p->cpu=arr[n-1][2]+end_same->cpu;
+	arr[n-1][2]=arr[n-1][2]-arr[n-1][2];
+	arr[n-1][3]=arr[n-1][3]+1;
+	p->next=NULL;
+	p->prev=NULL;
+	end_same->next=p;
+	p->prev=end_same;
+	end_same=p;
+	
+	for(int i=0;i<n;i++)
+	{
+		if(arr[i][2]>0)
+		{
+			nz++;
+		}
+	}
+	
+	int prio;
+	highpri=new int[nz];
+	
+	non_zero=new int[nz];
+	for(int i=0;i<n;i++)
+	{
+		if(arr[i][2] > 0) 
+		{
+			non_zero[k]=arr[i][2];
+			highpri[k]=arr[i][3];
+			k++;
+		}
+	}
+	sort(highpri, highpri+nz, greater<int>());
+	
+	for(int i=0;i<nz;i++)
+	{
+		for(int j=0;j<n;j++)
+		{
+			if((highpri[i] == arr[j][3]) && (arr[j][2] > 0))
+			{
+				node *p=new node;
+				p->allocate=end_same->cpu;
+				p->pro="p";
+				p->arrive=arr[j][0];
+				p->cpu=arr[j][2]+end_same->cpu;
+				arr[j][2]=arr[j][2]-arr[j][2];
+				p->next=NULL;
+				p->prev=NULL;
+				end_same->next=p;
+				p->prev=end_same;
+				end_same=p;
+			}	
+		}	
+	}	
+	node *pri=start_same;
+	cout<<"\n\t------------------ Gant Chart -------------------"<<endl;
+	cout<<"\n\t cpu allocate\tprocess\tcompletion"<<endl;
+	while(pri != NULL)
+	{
+		cout<<"\n\t\t"<<pri->allocate<<"\t"<<pri->pro<<pri->arrive<<"\t"<<pri->cpu<<endl;
+		pri=pri->next;
+	}
+	cout<<"\n\t-------------------------------------------------"<<endl;
+}
+int main()
+{
+	int n,count=0;
+	cout<<"enter no. of processes :";
+	cin>>n;
+	arrival=new int[n];
+	process=new int[n];
+	burst=new int[n];
+	priority=new int[n];
+	arr=new int*[n+1];
+	ctw = new int*[n];
+	for(int i=0;i<n;i++)
+	{
+		ctw[i]= new int[4];
+	}
+	sortarr=new int[n];
+	for(int i=0;i<n;i++)
+	{
+		arr[i]=new int[4];
+	}
+	for(int i=0;i<n;i++)
+	{
+		process[i]=i+1;
+		arr[i][0]=process[i];
+		ctw[i][0]=process[i];
+		cout<<"enter arrival time of process "<<i+1<<" : ";
+		cin>>arrival[i];
+		sortarr[i]=arrival[i];
+		arr[i][1]=arrival[i];
+		cout<<"enter burst time of process "<<i+1<<" : ";
+		cin>>burst[i];
+		arr[i][2]=burst[i];
+		arr[i][3]=0;
+	}
+	sort(sortarr,sortarr+n);
+	cout<<"\n\n\t\t processes \t Arrival Time \t Burst Time"<<endl;
+	for(int i=0;i<n;i++)
+	{
+		cout<<"\n\n\t\t\t"<<process[i]<<"\t\t"<<arrival[i]<<"\t\t"<<burst[i]<<"\n";
+	}
+	cout<<"\n\n processes \t Arrival Time \t Burst Time \t Priority"<<endl;
+	for(int i=0;i<n;i++)
+	{
+		for(int j=0;j<4;j++)
+		{
+			cout<<"\t"<<arr[i][j]<<"\t";
+		}
+		cout<<"\n";
+	}	
+	//cout<<"sorted arrival time is :"<<endl;
+	for(int i=0;i<n;i++)
+	{
+		priority[i]=0;
+	}
+	
+	//---------------- processes having same arrival time -----------------------------------
+	
+	for(int i=0;i<n;i++)
+	{
+		if(arrival[i] == arrival[0])
+		{
+			count++;
+		}
+	}
+	
+	if(count == n)
+	{
+		if(arrival[0] == 0)
+		{
+			same(n);
+		}
+		else
+		{
+			id=1;
+			node *p=new node;
+			p->allocate=0;
+			p->pro="idle";
+			p->arrive=1;
+			p->cpu=arr[0][1];
+			p->prev=NULL;
+			p->next=NULL;
+			if(start_same == NULL)
+			{
+				start_same=p;
+				end_same=p;
+			}
+			same(n);
+		}
+	}
+	
+	//-----------------------------------------------------------------------------------------
+	
+	else
+	{
+		different(n);
+		node *pri=start;
+	cout<<"\n\t------------------ Gant Chart -------------------"<<endl;
+	cout<<"\n\t cpu allocate\tprocess\tcompletion"<<endl;
+	while(pri != NULL)
+	{
+		cout<<"\n\t\t"<<pri->allocate<<"\t"<<pri->pro<<pri->arrive<<"\t"<<pri->cpu<<endl;
+		pri=pri->next;
+	}
+	cout<<"\n\t-------------------------------------------------"<<endl;
+	}
+	
+	cout<<"\n\n\tprocess\tcompilation Time\tturn around time\twaiting time"<<endl;
+	
+	//node *last_occur,*occur;
+	
+	//last_occur = start;
+	
+	
+	for(int i=0;i<n;i++)
+	{
+		node *last_occur,*occur;
+		occur = start;
+		while(occur != NULL)
+		{
+			if(occur->arrive == ctw[i][0])
+			{
+				last_occur = occur;
+			}
+			occur = occur->next;
+		}
+		
+		ctw[i][1] = last_occur->cpu;
+		ctw[i][2] = ctw[i][1] - arrival[i];
+		ctw[i][3] = ctw[i][2] - burst[i];
+	}
+	
+	for(int i=0;i<n;i++)
+	{
+		cout<<"\t"<<ctw[i][0]<<"\t\t"<<ctw[i][1]<<"\t\t\t"<<ctw[i][2]<<"\t\t"<<ctw[i][3]<<endl;
+	}
+	
+	int sum1=0,sum2=0;
+	for(int i=0;i<n;i++)
+	{
+		sum1 = sum1 + ctw[i][3];
+		sum2 = sum2 + ctw[i][2];
+	}
+	cout<<"\n\n\tAverage Waiting Time is :"<<(sum1 / n)<<endl;
+	cout<<"\n\tAverage Turn Around Time is :"<<(sum2 / n)<<endl;
+}
